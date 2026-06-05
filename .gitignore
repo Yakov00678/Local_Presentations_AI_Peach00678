@@ -1,0 +1,4 @@
+Presentations/
+*.pptx
+__pycache/
+.DS_Store
