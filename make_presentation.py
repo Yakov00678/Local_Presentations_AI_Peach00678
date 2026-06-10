@@ -5,7 +5,6 @@ from pptx.util import Inches
 from designer import apply_slide_design
 
 def parse_markdown_to_slides(text):
-    # Разделяем текст по маркерам слайдов
     raw_slides = re.split(r'#\s*СЛАЙД\s*\d+', text)
     slides_data = []
     
@@ -14,7 +13,15 @@ def parse_markdown_to_slides(text):
         if not lines:
             continue
             
-        slide_info = {'title': '', 'content_lines': [], 'table': None}
+        # Добавили новые ключи для картинок, цитат и метрик
+        slide_info = {
+            'title': '', 
+            'content_lines': [], 
+            'table': None, 
+            'image_path': None, 
+            'quote': None,
+            'metrics': []  
+        }
         table_rows = []
         
         for line in lines:
@@ -22,12 +29,30 @@ def parse_markdown_to_slides(text):
                 continue
             if line.startswith('##'):
                 slide_info['title'] = line.replace('##', '').strip()
+            
+            # РАСПОЗНАВАНИЕ ЦИТАТ
+            elif line.startswith('>'):
+                slide_info['quote'] = line.replace('>', '').strip()
+                
+            # РАСПОЗНАВАНИЕ КАРТИНОК ИЗ РАЗМЕТКИ МАРКДАУН: ![alt](path)
+            elif line.startswith('![') and ']' in line and '(' in line:
+                match = re.search(r'\((.*?)\)', line)
+                if match:
+                    slide_info['image_path'] = match.group(1).strip()
+            
+            # РАСПОЗНАВАНИЕ КРУПНЫХ ЦИФР-ПОКАЗАТЕЛЕЙ (Формат: **ПОКАЗАТЕЛЬ:** Число / Описание)
+            elif "**ПОКАЗАТЕЛЬ:**" in line or "**МЕТРИКА:**" in line:
+                clean_line = line.replace("**ПОКАЗАТЕЛЬ:**", "").replace("**МЕТРИКА:**", "").strip()
+                if "/" in clean_line:
+                    num, desc = clean_line.split("/", 1)
+                    slide_info['metrics'].append({'number': num.strip(), 'description': desc.strip()})
+                else:
+                    slide_info['metrics'].append({'number': clean_line, 'description': ''})
+                    
             elif line.startswith('|'):
-                # Проверяем, не является ли строка разделителем типа |---|---|
                 clean_line = line.replace('|', '').replace('-', '').replace(' ', '').strip()
                 if not clean_line:
                     continue
-                # Разбиваем строку на ячейки, убирая крайние пустые элементы
                 cells = [c.strip() for c in line.split('|')][1:-1]
                 if cells:
                     table_rows.append(cells)
@@ -37,7 +62,9 @@ def parse_markdown_to_slides(text):
         if table_rows:
             slide_info['table'] = table_rows
             
-        if slide_info['title'] or slide_info['content_lines'] or slide_info['table']:
+        if (slide_info['title'] or slide_info['content_lines'] or 
+            slide_info['table'] or slide_info['image_path'] or 
+            slide_info['quote'] or slide_info['metrics']):
             slides_data.append(slide_info)
         
     return slides_data
@@ -60,8 +87,6 @@ def create_presentation(slides_data, selected_theme):
     for data in slides_data:
         blank_layout = prs.slide_layouts[6]
         slide = prs.slides.add_slide(blank_layout)
-        
-        # Передаем управление дизайну слайда
         apply_slide_design(slide, data, theme_name=selected_theme)
 
     output_folder = "Presentations"
@@ -92,7 +117,7 @@ if user_choice not in ["1", "2", "3", "4", "5", "6"]:
     print("Неверный ввод. Будет использован стиль по умолчанию: 1 (Dark)")
     user_choice = "1"
 
-# Текст разметки презентации
+# НАШ ТЕСТОВЫЙ ТЕКСТ С НОВЫМИ ТИПАМИ КОНТЕНТА
 markdown_input = """
 ## Практика: написание интервью. Практика: написание рецензии.
 
@@ -258,6 +283,17 @@ markdown_input = """
 ✅ Прозрачность позиций — раскрытие конфликта интересов
 
 ✅ Работа со спойлерами — предупреждение заранее, если необходим для анализа
+
+---
+
+# СЛАЙД 12
+
+> Хорошее интервью — это всегда совместное творчество журналиста и собеседника.
+## Главное правило работы
+Камера и свет любят подготовленных авторов.
+
+![Пример техники](example.jpg)
+**ПОКАЗАТЕЛЬ:** 78% / Слушателей выбирают видео-формат подкастов
 """
 
 slides = parse_markdown_to_slides(markdown_input)

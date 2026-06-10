@@ -1,3 +1,4 @@
+import os
 from pptx.util import Inches, Pt
 from pptx.dml.color import RGBColor
 from pptx.enum.shapes import MSO_SHAPE
@@ -24,7 +25,7 @@ THEMES = {
         "table_header_text": RGBColor(0, 0, 0),
         "table_row_even": RGBColor(255, 255, 255),
         "table_row_odd": RGBColor(248, 250, 252),
-        "font_title": "Inter",                       # Идеальный гротеск для интерфейсов
+        "font_title": "Inter",                       
         "font_body": "Arial"
     },
     "3": { # 3 - Loft (ИЗДАТЕЛЬСКИЙ КРАФТ)
@@ -35,7 +36,7 @@ THEMES = {
         "table_header_text": RGBColor(242, 236, 226),
         "table_row_even": RGBColor(247, 242, 234),
         "table_row_odd": RGBColor(237, 230, 218),
-        "font_title": "Georgia",                     # Стильная антиква с засечками
+        "font_title": "Georgia",                     
         "font_body": "Palatino"
     },
     "4": { # 4 - Neon/Cyberpunk (ЦИФРОВОЙ КОД)
@@ -46,8 +47,8 @@ THEMES = {
         "table_header_text": RGBColor(11, 6, 21),
         "table_row_even": RGBColor(21, 11, 36),
         "table_row_odd": RGBColor(13, 7, 25),
-        "font_title": "Impact",                      # Плотный, агрессивный заголовок
-        "font_body": "Courier New"                   # Моноширинный шрифт разработчиков
+        "font_title": "Impact",                      
+        "font_body": "Courier New"                   
     },
     "5": { # 5 - Classic (ПРЕМИАЛЬНЫЙ БИЗНЕС)
         "bg": RGBColor(246, 248, 251),
@@ -57,7 +58,7 @@ THEMES = {
         "table_header_text": RGBColor(255, 255, 255),
         "table_row_even": RGBColor(255, 255, 255),
         "table_row_odd": RGBColor(236, 241, 246),
-        "font_title": "Garamond",                    # Классический дорогой книжный шрифт
+        "font_title": "Garamond",                    
         "font_body": "Times New Roman"
     },
     "6": { # 6 - Sketch (БЛОКНОТНЫЙ НАБРОСОК)
@@ -68,11 +69,10 @@ THEMES = {
         "table_header_text": RGBColor(41, 51, 71),
         "table_row_even": RGBColor(251, 251, 246),
         "table_row_odd": RGBColor(241, 244, 249),
-        "font_title": "Segoe Print",                 # Имитация аккуратного ручного ввода
+        "font_title": "Segoe Print",                 
         "font_body": "Segoe UI"
     }
 }
-
 
 def apply_slide_design(slide, data, theme_name="1"):
     theme = THEMES.get(theme_name, THEMES["1"])
@@ -91,7 +91,6 @@ def apply_slide_design(slide, data, theme_name="1"):
         title_len = len(data['title'])
         is_long_title = title_len > 30
         
-        # Меняем высоту бокса в зависимости от количества символов
         title_box_height = Inches(1.6) if is_long_title else Inches(0.9)
         
         txBox = slide.shapes.add_textbox(Inches(0.8), Inches(0.6), Inches(11.5), title_box_height)
@@ -104,7 +103,6 @@ def apply_slide_design(slide, data, theme_name="1"):
         p.font.bold = True
         p.font.color.rgb = theme["text"]
         
-        # Динамическая позиция линии: сдвигаем ниже, если заголовок перенесся на 2 строки
         line_top = Inches(2.1) if is_long_title else Inches(1.5)
         
         line = slide.shapes.add_shape(
@@ -114,18 +112,19 @@ def apply_slide_design(slide, data, theme_name="1"):
         line.fill.fore_color.rgb = theme["accent"]
         line.line.color.rgb = theme["accent"]
         
-        # Обновляем координату начала контента под линией заголовка
         current_top = line_top + Inches(0.5)
 
-    # Максимальная высота контентной зоны на слайде
     max_available_height = Inches(4.5)
+    
+    # Детекция картинки: если файл существует, ужимаем текстовую сетку влево
+    has_image = data.get('image_path') and os.path.exists(data['image_path'])
+    content_width = Inches(6.0) if has_image else Inches(11.5)
         
-    # 3. Оформление текста и списков (с рабочим Autofit переполнения)
+    # 3. Оформление текста и списков (ТВОЙ НАСТРОЕННЫЙ КОД)
     if data.get('content_lines'):
-        # Если есть таблица — выделяем под текст верхнюю половину экрана, если нет — всё доступное место
-        box_height = max_available_height if not data.get('table') else Inches(1.8)
+        box_height = max_available_height if not data.get('table') and not data.get('quote') and not data.get('metrics') else Inches(1.8)
         
-        txBox = slide.shapes.add_textbox(Inches(0.8), current_top, Inches(11.5), box_height)
+        txBox = slide.shapes.add_textbox(Inches(0.8), current_top, content_width, box_height)
         tf = txBox.text_frame
         tf.word_wrap = True
         tf.auto_size = MSO_AUTO_SIZE.TEXT_TO_FIT_SHAPE 
@@ -149,10 +148,67 @@ def apply_slide_design(slide, data, theme_name="1"):
             p.font.name = theme["font_body"]
             p.font.color.rgb = theme["text"]
             
-        # Сдвигаем маркер высоты для таблицы строго под текстовый блок
         current_top += box_height + Inches(0.3)
+
+    # 4. ДОБАВЛЕНИЕ КАРТИНКИ (справа, если она есть на диске)
+    if has_image:
+        img_left = Inches(7.5)
+        img_top = Inches(2.2)
+        img_width = Inches(5.0)
+        slide.shapes.add_picture(data['image_path'], img_left, img_top, width=img_width)
+
+    # 5. КРУПНЫЕ ЦИФРЫ-ПОКАЗАТЕЛИ (МЕТРИКИ)
+    if data.get('metrics'):
+        metrics_count = len(data['metrics'])
+        if metrics_count > 0:
+            card_width = content_width / metrics_count - Inches(0.2)
+            
+            for m_idx, metric in enumerate(data['metrics']):
+                m_left = Inches(0.8) + m_idx * (card_width + Inches(0.2))
+                m_box = slide.shapes.add_textbox(m_left, current_top, card_width, Inches(1.8))
+                tf = m_box.text_frame
+                tf.word_wrap = True
                 
-    # 4. Оформление таблицы (с автоматическим подбором ширины колонок)
+                # Огромная акцентная цифра
+                p_num = tf.paragraphs[0]
+                p_num.text = metric['number']
+                p_num.font.name = theme["font_title"]
+                p_num.font.size = Pt(44)
+                p_num.font.bold = True
+                p_num.font.color.rgb = theme["accent"]
+                
+                # Описание под ней
+                if metric['description']:
+                    p_desc = tf.add_paragraph()
+                    p_desc.text = metric['description']
+                    p_desc.font.name = theme["font_body"]
+                    p_desc.font.size = Pt(14)
+                    p_desc.font.color.rgb = theme["text"]
+                    p_desc.space_before = Pt(4)
+                    
+            current_top += Inches(2.0)
+
+    # 6. ОФОРМЛЕНИЕ ЦИТАТЫ (Стильная фоновая плашка-карточка)
+    if data.get('quote'):
+        quote_box = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(0.8), current_top, content_width, Inches(1.2))
+        quote_box.fill.solid()
+        quote_box.fill.fore_color.rgb = theme["table_row_even"]
+        quote_box.line.color.rgb = theme["accent"]
+        
+        tf = quote_box.text_frame
+        tf.word_wrap = True
+        tf.vertical_anchor = MSO_ANCHOR.MIDDLE
+        p = tf.paragraphs[0]
+        p.text = f"“{data['quote']}”"
+        p.alignment = PP_ALIGN.LEFT
+        p.font.name = theme["font_body"]
+        p.font.size = Pt(16)
+        p.font.color.rgb = theme["text"]
+        p.font.italic = True
+        
+        current_top += Inches(1.5)
+                
+     # 7. Оформление таблицы (ТВОЙ НАСТРОЕННЫЙ КОД С АВТОПОДБОРОМ ШИРИНЫ КОЛОНОК)
     if data.get('table'):
         rows = len(data['table'])
         cols = max(len(row) for row in data['table']) if data['table'] else 0
@@ -160,13 +216,13 @@ def apply_slide_design(slide, data, theme_name="1"):
         if rows > 0 and cols > 0:
             left = Inches(0.8)
             top = current_top if data.get('content_lines') else Inches(2.2)
-            total_width = Inches(11.7)  # Общая ширина таблицы на слайде
+            total_width = Inches(11.7)  
             height = Inches(0.4 * rows)
             
             table_shape = slide.shapes.add_table(rows, cols, left, top, total_width, height)
             table = table_shape.table
             
-            # --- УМНЫЙ ПОДБОР ШИРИНЫ КОЛОНОК ---
+            # Алгоритм автоподбора ширины колонок
             max_chars_per_col = [0] * cols
             for row in data['table']:
                 for c_idx, val in enumerate(row):
@@ -179,8 +235,8 @@ def apply_slide_design(slide, data, theme_name="1"):
             for c_idx in range(cols):
                 col_share = max_chars_per_col[c_idx] / total_chars
                 table.columns[c_idx].width = int(total_width * col_share)
-            # ----------------------------------
             
+            # Стилизация и заполнение ячеек данными
             for r_idx, row in enumerate(data['table']):
                 for c_idx, val in enumerate(row):
                     if c_idx < len(table.columns):
