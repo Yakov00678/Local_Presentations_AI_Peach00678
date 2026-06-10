@@ -3,75 +3,76 @@ from pptx.dml.color import RGBColor
 from pptx.enum.shapes import MSO_SHAPE
 from pptx.enum.text import MSO_ANCHOR, PP_ALIGN, MSO_AUTO_SIZE
 
-# НАШ СЛОВАРЬ ЦВЕТОВЫХ ТЕМ
+# НАШ ОБНОВЛЕННЫЙ СЛОВАРЬ ЦВЕТОВЫХ ТЕМ С ДИЗАЙНЕРСКИМИ ШРИФТАМИ
 THEMES = {
-    "1": { # 1 - Dark (ПОЛНОСТЬЮ ТЕМНЫЙ СТИЛЬ)
-        "bg": RGBColor(24, 28, 36),                  # Глубокий темный фон слайда
-        "text": RGBColor(240, 244, 248),             # Мягкий белый текст
-        "accent": RGBColor(52, 152, 219),            # Яркий неоново-синий для акцентных линий
-        "table_header_bg": RGBColor(34, 40, 52),     # Темная стальная шапка
-        "table_header_text": RGBColor(52, 152, 219),   # Неоново-синий текст в шапке
-        "table_row_even": RGBColor(28, 34, 44),      # Четные строки таблицы (чуть светлее)
-        "table_row_odd": RGBColor(22, 26, 34),       # Нечетные строки таблицы (чуть темнее)
-        "font_title": "Dela Gothic One",             # Кастомный шрифт для заголовков
-        "font_body": "Montserrat"                    # Читаемый шрифт для основного контента
+    "1": { # 1 - Dark (УЛЬТРАСОВРЕМЕННЫЙ СТИЛЬ)
+        "bg": RGBColor(24, 28, 36),
+        "text": RGBColor(240, 244, 248),
+        "accent": RGBColor(52, 152, 219),
+        "table_header_bg": RGBColor(34, 40, 52),
+        "table_header_text": RGBColor(52, 152, 219),
+        "table_row_even": RGBColor(28, 34, 44),
+        "table_row_odd": RGBColor(22, 26, 34),
+        "font_title": "Dela Gothic One",             
+        "font_body": "Montserrat"                    
     },
-    "2": { # 2 - White
+    "2": { # 2 - White (ШВЕЙЦАРСКИЙ МИНИМАЛИЗМ)
         "bg": RGBColor(255, 255, 255),
-        "text": RGBColor(10, 10, 10),
+        "text": RGBColor(15, 17, 23),
         "accent": RGBColor(0, 0, 0),
-        "table_header_bg": RGBColor(240, 240, 240),
+        "table_header_bg": RGBColor(242, 244, 247),
         "table_header_text": RGBColor(0, 0, 0),
         "table_row_even": RGBColor(255, 255, 255),
-        "table_row_odd": RGBColor(248, 248, 248),
-        "font_title": "Arial",
+        "table_row_odd": RGBColor(248, 250, 252),
+        "font_title": "Inter",                       # Идеальный гротеск для интерфейсов
         "font_body": "Arial"
     },
-    "3": { # 3 - Loft
-        "bg": RGBColor(240, 234, 224),
-        "text": RGBColor(60, 50, 45),
-        "accent": RGBColor(160, 82, 45),
-        "table_header_bg": RGBColor(110, 90, 80),
-        "table_header_text": RGBColor(240, 234, 224),
-        "table_row_even": RGBColor(245, 240, 232),
-        "table_row_odd": RGBColor(235, 228, 216),
-        "font_title": "Georgia",
+    "3": { # 3 - Loft (ИЗДАТЕЛЬСКИЙ КРАФТ)
+        "bg": RGBColor(242, 236, 226),
+        "text": RGBColor(61, 51, 46),
+        "accent": RGBColor(166, 85, 46),
+        "table_header_bg": RGBColor(112, 92, 82),
+        "table_header_text": RGBColor(242, 236, 226),
+        "table_row_even": RGBColor(247, 242, 234),
+        "table_row_odd": RGBColor(237, 230, 218),
+        "font_title": "Georgia",                     # Стильная антиква с засечками
         "font_body": "Palatino"
     },
-    "4": { # 4 - Neon/Cyberpunk
-        "bg": RGBColor(10, 5, 20),
+    "4": { # 4 - Neon/Cyberpunk (ЦИФРОВОЙ КОД)
+        "bg": RGBColor(11, 6, 21),
         "text": RGBColor(0, 255, 240),
         "accent": RGBColor(255, 0, 128),
         "table_header_bg": RGBColor(255, 0, 128),
-        "table_header_text": RGBColor(10, 5, 20),
-        "table_row_even": RGBColor(20, 10, 35),
-        "table_row_odd": RGBColor(12, 6, 24),
-        "font_title": "Impact",
-        "font_body": "Courier New"
+        "table_header_text": RGBColor(11, 6, 21),
+        "table_row_even": RGBColor(21, 11, 36),
+        "table_row_odd": RGBColor(13, 7, 25),
+        "font_title": "Impact",                      # Плотный, агрессивный заголовок
+        "font_body": "Courier New"                   # Моноширинный шрифт разработчиков
     },
-    "5": { # 5 - Classic
-        "bg": RGBColor(245, 247, 250),
-        "text": RGBColor(15, 32, 67),
-        "accent": RGBColor(212, 175, 55),
-        "table_header_bg": RGBColor(15, 32, 67),
+    "5": { # 5 - Classic (ПРЕМИАЛЬНЫЙ БИЗНЕС)
+        "bg": RGBColor(246, 248, 251),
+        "text": RGBColor(16, 33, 68),
+        "accent": RGBColor(213, 176, 56),
+        "table_header_bg": RGBColor(16, 33, 68),
         "table_header_text": RGBColor(255, 255, 255),
         "table_row_even": RGBColor(255, 255, 255),
-        "table_row_odd": RGBColor(235, 240, 245),
-        "font_title": "Times New Roman",
+        "table_row_odd": RGBColor(236, 241, 246),
+        "font_title": "Garamond",                    # Классический дорогой книжный шрифт
         "font_body": "Times New Roman"
     },
-    "6": { # 6 - Sketch
-        "bg": RGBColor(250, 250, 245),
-        "text": RGBColor(40, 50, 70),
-        "accent": RGBColor(190, 190, 190),
-        "table_header_bg": RGBColor(220, 225, 235),
-        "table_header_text": RGBColor(40, 50, 70),
-        "table_row_even": RGBColor(250, 250, 245),
-        "table_row_odd": RGBColor(240, 243, 248),
-        "font_title": "Comic Sans MS",
-        "font_body": "Comic Sans MS"
+    "6": { # 6 - Sketch (БЛОКНОТНЫЙ НАБРОСОК)
+        "bg": RGBColor(251, 251, 246),
+        "text": RGBColor(41, 51, 71),
+        "accent": RGBColor(191, 191, 191),
+        "table_header_bg": RGBColor(221, 226, 236),
+        "table_header_text": RGBColor(41, 51, 71),
+        "table_row_even": RGBColor(251, 251, 246),
+        "table_row_odd": RGBColor(241, 244, 249),
+        "font_title": "Segoe Print",                 # Имитация аккуратного ручного ввода
+        "font_body": "Segoe UI"
     }
 }
+
 
 def apply_slide_design(slide, data, theme_name="1"):
     theme = THEMES.get(theme_name, THEMES["1"])
